@@ -3,6 +3,8 @@ using AuctionService.DTOs;
 using AuctionService.Entities;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Contracts;
+using MassTransit;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,10 +16,12 @@ public class AuctionsController : ControllerBase
 {
     private readonly AuctionDbContext _context;
     private readonly IMapper _mapper;
-    public AuctionsController(AuctionDbContext context,IMapper mapper)
+    private readonly IPublishEndpoint _publishEndpoint;
+    public AuctionsController(AuctionDbContext context,IMapper mapper, IPublishEndpoint publishEndpoint)
     {
         _context=context;
         _mapper=mapper;
+        _publishEndpoint=publishEndpoint;
     }
     [HttpGet]
     public async Task<ActionResult<List<AuctionDto>>> GetAllAuctions(string date)
@@ -63,9 +67,17 @@ public class AuctionsController : ControllerBase
         //TODO: add current user as seller 
         auction.Seller="test";
         _context.Auctions.Add(auction);
+        
+        var newAuction= _mapper.Map<AuctionDto>(auction);
+
+        await _publishEndpoint.Publish(_mapper.Map<AuctionCreated>(newAuction));
+
+
         var result= await _context.SaveChangesAsync()>0;
+
+
         if(!result) return BadRequest("Could not save changes to the Db");
-        return CreatedAtAction(nameof(GetAuctionById),new {auction.Id},_mapper.Map<AuctionDto>(auction));
+        return CreatedAtAction(nameof(GetAuctionById),new {auction.Id},newAuction);
 
     }
     [HttpPut("{id}")]
@@ -83,7 +95,20 @@ public class AuctionsController : ControllerBase
         auction.Item.Mileage=updateAuctionDto.Mileage ?? auction.Item.Mileage;
         auction.Item.Year=updateAuctionDto.Year ?? auction.Item.Year;
 
+        // we need to publish before saving changes so that the event get saved in the outbox
+        // if we don't the event will not be saved in the outbox and hence will not be picked up 
+        // by MassTransit for consumption
+
+        // in case we are not using outbox .. we could publish after saving
+
+        // passing through the DTO
+
+        // var updatedAuction= _mapper.Map<AuctionDto>(auction);
+        // await _publishEndpoint.Publish(_mapper.Map<AuctionUpdated>(updatedAuction));
+        await _publishEndpoint.Publish(_mapper.Map<AuctionUpdated>(auction));
         var result = await _context.SaveChangesAsync()>0;
+
+
 
         if(result) return Ok();
         return BadRequest("Problem saving changes");
@@ -92,16 +117,25 @@ public class AuctionsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteAuction(Guid id)
     {
+       
         var auction= await _context.Auctions.Include(x=>x.Item).FirstOrDefaultAsync(x=>x.Id==id);
         if(auction==null) return NotFound();
         //TODO: check if auction.seller== username
         _context.Auctions.Remove(auction);
+
+         await _publishEndpoint.Publish(new AuctionDeleted
+        {
+            Id = id.ToString()
+        });
+        System.Console.WriteLine($"delete-auction published");
         var result = await _context.SaveChangesAsync()>0;
-
-        if(result) return Ok();
         
-        return BadRequest("Could not update DB");
+        if (!result)
+            return BadRequest("Could not update DB");
 
+       
+        
+        return Ok();
     }
 
 }
