@@ -1,7 +1,6 @@
 using AuctionService.Consumers;
 using AuctionService.Data;
 using AutoMapper;
-using Contracts;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
