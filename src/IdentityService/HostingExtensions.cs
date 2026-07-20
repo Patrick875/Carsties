@@ -28,30 +28,25 @@ internal static class HostingExtensions
                 options.Events.RaiseInformationEvents = true;
                 options.Events.RaiseFailureEvents = true;
                 options.Events.RaiseSuccessEvents = true;
+
+                if (builder.Environment.IsEnvironment("Docker"))
+                {
+                    options.IssuerUri="http://localhost:5001";
+                }
             })
             .AddInMemoryIdentityResources(Config.IdentityResources)
             .AddInMemoryApiScopes(Config.ApiScopes)
             .AddInMemoryClients(Config.Clients)
             .AddAspNetIdentity<ApplicationUser>()
-            .AddProfileService<CustomProfileService>();
-          
+            .AddProfileService<CustomProfileService>()
+            .AddLicenseSummary();
 
         builder.Services.ConfigureApplicationCookie(options =>
         {
-           options.Cookie.SameSite=SameSiteMode.Lax; 
+            options.Cookie.SameSite=SameSiteMode.Lax;
         });
 
         builder.Services.AddAuthentication();
-            // .AddGoogle(options =>
-            // {
-            //     options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-
-            //     // register your IdentityServer with Google at https://console.developers.google.com
-            //     // enable the Google+ API
-            //     // set the redirect URI to https://localhost:5001/signin-google
-            //     options.ClientId = "copy client ID from Google here";
-            //     options.ClientSecret = "copy client secret from Google here";
-            // });
 
         return builder.Build();
     }

@@ -15,40 +15,21 @@ public static class Config
         new ApiScope[]
         {
             new ApiScope("auctionApp","Auction app full access"),
-
         };
 
     public static IEnumerable<Client> Clients =>
         new Client[]
         {
-           new Client
-           {
-               ClientId="postman",
-               ClientName="Postman",
-               AllowedScopes={"openid","profile","auctionApp"},
-               RedirectUris={"https://wwww.getpostman.com/oauth2/callback"},
-               ClientSecrets= 
-               {
-                   new Secret("NotASecret".Sha256())
-               },
-               AllowedGrantTypes={GrantType.ResourceOwnerPassword}
-           },
-           new Client
-           {
-               ClientId="nextApp",
-               ClientName="nextApp",
-               ClientSecrets= 
-               {
-                   new Secret("secret".Sha256())
-               },
-               AllowedGrantTypes=GrantTypes.CodeAndClientCredentials,
-               RequirePkce=false,
-               RedirectUris={"http://localhost:3000/api/auth/callback/id-server"},
-               AllowOfflineAccess=true,
-               AllowedScopes={"open-id","profile","auctionApp"},
-               AccessTokenLifetime=3600*24*30
-           }
+            new Client
+            {
+                ClientId="postman",
+                ClientName="Postman",
+                ClientSecrets={ new Secret("NotASecret".Sha256())},
+                AllowedScopes={"openid","profile","auctionApp"},
+                RedirectUris={"https://getpostman.com/oauth2/callback"},
+                AllowedGrantTypes = {GrantType.ResourceOwnerPassword},
 
+            },
             
         };
 }

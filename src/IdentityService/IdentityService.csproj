@@ -8,9 +8,12 @@
 
 	<ItemGroup>
 		<PackageReference Include="Duende.IdentityServer.AspNetIdentity" version="7.2.0" />
+
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.11" />
+
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
 		<PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="8.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.11" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="8.0.11" />
@@ -19,6 +22,5 @@
 
 	<ItemGroup>
 	  <Folder Include="Pages/Account/Register/" />
-	  <Folder Include="Services/" />
 	</ItemGroup>
 </Project>

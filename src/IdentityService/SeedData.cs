@@ -1,11 +1,12 @@
 using System.Security.Claims;
-namespace IdentityService;
-using IdentityService.Models;
+using Duende.IdentityModel;
 using IdentityService.Data;
+using IdentityService.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Duende.IdentityModel;
+
+namespace IdentityService;
 
 public class SeedData
 {
@@ -19,8 +20,10 @@ public class SeedData
 
         if (userMgr.Users.Any())
         {
-            return;
+            return ;
         }
+  
+
         var alice = userMgr.FindByNameAsync("alice").Result;
         if (alice == null)
         {
@@ -38,9 +41,6 @@ public class SeedData
 
             result = userMgr.AddClaimsAsync(alice, new Claim[]{
                             new Claim(JwtClaimTypes.Name, "Alice Smith"),
-                            // new Claim(JwtClaimTypes.GivenName, "Alice"),
-                            // new Claim(JwtClaimTypes.FamilyName, "Smith"),
-                            // new Claim(JwtClaimTypes.WebSite, "http://alice.example.com"),
                         }).Result;
             if (!result.Succeeded)
             {
@@ -70,7 +70,6 @@ public class SeedData
 
             result = userMgr.AddClaimsAsync(bob, new Claim[]{
                             new Claim(JwtClaimTypes.Name, "Bob Smith"),
-                           
                         }).Result;
             if (!result.Succeeded)
             {
